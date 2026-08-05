@@ -29,3 +29,12 @@ uploads/
 *.pem
 *.key
 kaggle.json
+
+# Local Python and macOS files
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Backup of old Streamlit deployment
+deployment/streamlit_old/
