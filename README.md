@@ -1,16 +1,42 @@
 # Synthetic Sight
 
-**Detecting AI-generated faces for digital literacy**  
-AI4ALL Ignite · Summer 2026 · Team 9C  
+**Detecting AI-generated faces for digital literacy**
+
+### AI4ALL Ignite · Summer 2026 · Team 9C  
 Julissa Lema · Kristine Johnson · Ricky Dixon · Shloka Kandukuri
+
+## Quick start
+
+```bash
+git clone https://github.com/kristinealli/SyntheticSight.git
+cd SyntheticSight
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+```bash
+python -m src.inference --image path/to/image.jpg
+```
+
+## Documentation
+
+- [Data card](docs/data.md) — dataset source, preprocessing, splits, and limits
+- [Evaluation](docs/evaluation.md) — metrics, threshold selection, and errors
+- [Bias and ethics](docs/bias-and-ethics.md) — audit scope and responsible use
+- [Project history](docs/project-history.md) — consolidation and checkpoint audit
 
 Synthetic Sight is a reproducible computer-vision research prototype that asks:
 
-> **Can a CNN classifier distinguish real human faces from StyleGAN-generated synthetic faces well enough to help flag possible misinformation?**
+> Can a CNN classifier distinguish real human faces from StyleGAN-generated
+> synthetic faces well enough to help flag possible misinformation?
 
-The final system uses **ImageNet-pretrained ResNet-50 transfer learning** to classify still face images as **Real (0)** or **Synthetic/Fake (1)**. It is designed as a **review-support signal**, not an authentication service and not a universal deepfake detector.
+The final system uses **ImageNet-pretrained ResNet-50 transfer learning** to
+classify still face images as **Real (0)** or **Synthetic/Fake (1)**.
 
-## Final benchmark result
+Synthetic Sight is a review-support signal, not an authentication service or a universal deepfake detector.
+
+## Held-Out Benchmark Result
 
 | Metric | Final result |
 |---|---:|
@@ -22,15 +48,23 @@ The final system uses **ImageNet-pretrained ResNet-50 transfer learning** to cla
 | False positives | 39 real images flagged synthetic |
 | False negatives | 23 synthetic images labeled real |
 
+For evaluation details, including class-specific metrics and the confusion
+matrix, see [`docs/evaluation.md`](docs/evaluation.md).
+
+These results show extremely strong separation **within this FFHQ-versus-StyleGAN
+benchmark**. They do not establish equivalent performance for newer generators,
+face swaps, video, screenshots, recompressed media, edited real images, or
+uncontrolled real-world images.
+
 The test split was held out while the model, checkpoint, and threshold were developed. These results show extremely strong separation **within this benchmark**; they do not establish the same performance on newer generators, face swaps, video, screenshots, heavy recompression, or uncontrolled real-world images.
 
 ![Final test confusion matrix](assets/resnet50_final_test_confusion_matrix.png)
 
-## What changed from the original project archive
+## Repository history
 
-This repository has been consolidated around the **final ResNet-50 pipeline** used for the presentation. Exploratory Random Forest, custom CNN, FFT, PCA, duplicate deployment experiments, the unfinished React frontend, and stale result artifacts were removed from the main code path. Their role in the project is documented in [`docs/project-history.md`](docs/project-history.md).
-
-One integrity issue was important enough **not** to hide: the checkpoint bundled inside the original API/Streamlit folders was an **older epoch-9 model** with threshold `0.50`, dropout `0.40`, and no BatchNorm layer in the classifier head. The true final checkpoint was recovered from the project's `deepfake_detection_checkpoints` artifact archive produced by the executed notebook originally named `training_exploration_reinteration_kristine.ipynb`. The recovered model is epoch 13, uses the final BatchNorm + Dropout 0.30 head, and stores the selected threshold `0.51`. It is now included at `models/best_resnet50.pth` and verified before deployment.
+This repository is consolidated around the final ResNet-50 pipeline used for
+the presentation. See [`docs/project-history.md`](docs/project-history.md) for the full audit
+trail and earlier experiments.
 
 ## Method
 
@@ -66,40 +100,26 @@ flowchart LR
 
 The final notebook's implementation monitors **validation Fake F1** for checkpointing. Epoch 13 also has the **lowest recorded validation loss**, which is why the final presentation's “lowest validation loss” description identifies the same checkpoint.
 
+
 ![Training loss](assets/resnet50_loss_curves.png)
 ![Validation metrics by epoch](assets/validation_metrics_by_epoch.png)
 
 ## Repository layout
 
 ```text
-SyntheticSight_Final/
+SyntheticSight/
 ├── README.md
-├── assets/                         # Final-run plots used by the documentation
+├── assets/                  # Final-run plots used by documentation
 ├── deployment/
-│   ├── streamlit_app.py            # Interactive research prototype
-│   ├── api.py                      # Reusable FastAPI inference endpoint
+│   ├── streamlit_app.py     # Interactive research prototype
+│   ├── api.py               # FastAPI inference endpoint
 │   └── Dockerfile
 ├── docs/
-│   ├── architecture.md
-│   ├── bias-and-ethics.md
-│   ├── data.md
-│   ├── deployment.md
-│   ├── evaluation.md
-│   ├── project-history.md
-│   ├── references.md
-│   └── repository-review.md
 ├── models/
-│   ├── model_metadata.json
-│   ├── training_history.csv
-│   ├── validation_metrics.csv
-│   ├── final_test_metrics.csv
-│   └── README.md                   # Final-checkpoint instructions
 ├── notebooks/
-│   ├── 01_resnet50_final_training.ipynb
-│   └── 02_apparent_lightness_audit.ipynb
-├── scripts/verify_checkpoint.py
-├── src/synthetic_sight/            # Shared model + inference code
-└── tests/                           # Model/preprocessing contract tests
+├── scripts/
+├── src/synthetic_sight/     # Shared model and inference code
+└── tests/                   # Preprocessing/model contract tests
 ```
 
 ## Setup
@@ -178,14 +198,14 @@ The detector should **flag content for review**, not authenticate it. False posi
 
 ## Reproducibility notes
 
-- Training and validation file paths were checked for zero overlap.
+- File paths were checked for zero overlap across training, validation, and test partitions.
 - The test split stayed locked until checkpoint and threshold decisions were complete.
 - The final training provenance traces to the executed source notebook `training_exploration_reinteration_kristine.ipynb`; the polished repository includes its consolidated counterpart as `notebooks/01_resnet50_final_training.ipynb`.
 - The notebook records the sample configuration, labels, seed, transforms, training schedule, checkpoint metadata, and evaluation logic.
 - The final repository deliberately rejects legacy checkpoints whose architecture metadata does not match the final run.
 - A stronger future audit should also check image near-duplicates and source-level correlations.
 
-## Next steps
+## Planned Next Steps
 
 1. Test the existing model on **unseen generator families before retraining** to measure generator drift.
 2. Evaluate compression, resizing, screenshots, filters, and other real-world transformations.
