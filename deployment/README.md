@@ -1,33 +1,9 @@
-# Running Locally
+# Deployment Interfaces
 
-## 1. Backend (FastAPI)
+Both deployment interfaces import the shared `synthetic_sight` Python package. This is intentional: preprocessing, architecture, labels, and threshold logic should have one source of truth.
 
-cd deployment/api
-docker build -t deepfake-api .
-docker run -p 8001:8001 deepfake-api
+- `streamlit_app.py` — human-facing upload workflow.
+- `api.py` — FastAPI endpoints for programmatic inference.
+- `Dockerfile` — API container example.
 
-API will be available at http://localhost:8001
-Docs/testing UI: http://localhost:8001/docs
-
-## 2. Frontend (React)
-
-cd deployment/frontend
-npm install
-npm run dev
-
-Opens at http://localhost:5173 (or next available port — check terminal output)
-
-Note: if the frontend runs on a different port than 5173, update `allow_origins`
-in `deployment/api/main.py` to match, or the API will block the request (CORS).
-
-## 3. Streamlit (alternative, all-in-one version)
-
-cd deployment/streamlit
-pip install -r requirements.txt
-streamlit run app.py
-
-Opens at http://localhost:8501 — runs the model directly, no separate API needed.
-
----
-Model: best_resnet50.pth (christina)
-Not yet deployed, running locally only for now.
+The verified final checkpoint is **not included** in this package because the supplied archive contained only a legacy artifact. See `../models/README.md`.

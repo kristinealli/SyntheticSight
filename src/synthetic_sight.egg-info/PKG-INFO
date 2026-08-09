@@ -1,0 +1,25 @@
+Metadata-Version: 2.4
+Name: synthetic-sight
+Version: 1.0.0
+Summary: ResNet-50 research prototype for detecting StyleGAN-generated face images
+Requires-Python: >=3.10
+Requires-Dist: numpy>=1.26
+Requires-Dist: Pillow>=10.0
+Requires-Dist: torch>=2.2
+Requires-Dist: torchvision>=0.17
+Provides-Extra: app
+Requires-Dist: streamlit>=1.38; extra == "app"
+Provides-Extra: api
+Requires-Dist: fastapi>=0.112; extra == "api"
+Requires-Dist: uvicorn[standard]>=0.30; extra == "api"
+Requires-Dist: python-multipart>=0.0.9; extra == "api"
+Provides-Extra: research
+Requires-Dist: pandas>=2.2; extra == "research"
+Requires-Dist: scikit-learn>=1.4; extra == "research"
+Requires-Dist: matplotlib>=3.8; extra == "research"
+Requires-Dist: opencv-python-headless>=4.9; extra == "research"
+Requires-Dist: kaggle>=1.6; extra == "research"
+Requires-Dist: jupyter>=1.0; extra == "research"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: ruff>=0.6; extra == "dev"

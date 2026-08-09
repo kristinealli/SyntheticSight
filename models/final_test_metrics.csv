@@ -1,0 +1,2 @@
+evaluation_split,images,real_images,synthetic_images,accuracy,fake_precision,fake_recall,fake_f1,roc_auc,decision_threshold,true_negative,false_positive,false_negative,true_positive,source_note
+Test,20000,10000,10000,0.9969,0.9961062300319489,0.9977,0.9969,0.99995,0.51,9961,39,23,9977,Final presentation; locked official test split

@@ -1,0 +1,11 @@
+{
+  "source_artifact": "deployment/api/models/best_resnet50.pth (identical copy also existed under deployment/streamlit/models)",
+  "sha256": "3a74dd6f1c01ee093d977416718d938cb34aa14899b4d82ddf300a9090478390",
+  "epoch": 9,
+  "monitor_metric": "Fake F1",
+  "monitor_value": 0.8986520219670494,
+  "decision_threshold": 0.5,
+  "head_observed_from_state_dict": "Linear(2048,256) -> ReLU -> Dropout(0.40) -> Linear(256,1)",
+  "final_expected_head": "Linear(2048,256) -> BatchNorm1d(256) -> ReLU -> Dropout(0.30) -> Linear(256,1)",
+  "status": "Legacy / incompatible with final presentation run; binary intentionally excluded."
+}

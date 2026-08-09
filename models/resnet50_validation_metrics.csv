@@ -1,2 +1,0 @@
-Experiment,Evaluation split,Images,Accuracy,Fake precision,Fake recall,Fake F1,Real F1,Macro F1,Weighted F1,Decision threshold,ROC-AUC,PR-AUC,Loss,Checkpoint SHA256
-Best validation checkpoint (epoch 15),Validation,4000,0.9865,0.9855289421157685,0.9875,0.9865134865134865,0.9864864864864865,0.9864999864999865,0.9864999864999866,0.78,0.99894825,0.9989550866445234,0.04804623131488916,d3c875e216bd08eeff7a3f36e44f4bd8b790925da14123b2659aafee476cde7a

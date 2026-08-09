@@ -1,110 +1,213 @@
-# Deepfake Detection Project
+# Synthetic Sight
 
-**Working Name:** Synthetic Sight  
-**AI4ALL Team 9C**
+**Detecting AI-generated faces for digital literacy**  
+AI4ALL Ignite · Summer 2026 · Team 9C  
+Julissa Lema · Kristine Johnson · Ricky Dixon · Shloka Kandukuri
 
-## 1. Project Overview & Problem Statement
-With the rapid advancement of generative AI models, synthetic imagery has become increasingly realistic and accessible. The goal of **Synthetic Sight** is to develop a robust binary image classification pipeline capable of distinguishing between real human faces and AI-generated synthetic faces. This project focuses on evaluating deep learning architectures (specifically ResNet-50) and auditing datasets for potential demographic and data biases.
+Synthetic Sight is a reproducible computer-vision research prototype that asks:
 
-## 2. Dataset Information
-We used the **140k Real and Fake Faces Kaggle Dataset**:
-* **Real Images (70,000):** Sourced from NVIDIA’s Flickr-Faces-HQ (FFHQ) dataset.
-* **Fake Images (70,000):** Sampled from 1 Million StyleGAN-generated synthetic faces.
-* **Pre-processing:** All images are normalized and resized to 224 × 224 pixels for ResNet-50 across training, validation, and test splits.
+> **Can a CNN classifier distinguish real human faces from StyleGAN-generated synthetic faces well enough to help flag possible misinformation?**
 
-## 3. Project Structure
-```plaintext
-deepfake-detection/
-├── assets/                 # Visualizations, diagrams, and evaluation plots
-├── data/                   # Data README and setup instructions
+The final system uses **ImageNet-pretrained ResNet-50 transfer learning** to classify still face images as **Real (0)** or **Synthetic/Fake (1)**. It is designed as a **review-support signal**, not an authentication service and not a universal deepfake detector.
+
+## Final benchmark result
+
+| Metric | Final result |
+|---|---:|
+| Locked test images | 20,000 (10,000 real / 10,000 synthetic) |
+| Accuracy | **99.69%** |
+| Fake F1 | **99.69%** |
+| ROC-AUC | **99.995%** |
+| Decision threshold | **0.51** |
+| False positives | 39 real images flagged synthetic |
+| False negatives | 23 synthetic images labeled real |
+
+The test split was held out while the model, checkpoint, and threshold were developed. These results show extremely strong separation **within this benchmark**; they do not establish the same performance on newer generators, face swaps, video, screenshots, heavy recompression, or uncontrolled real-world images.
+
+![Final test confusion matrix](assets/resnet50_final_test_confusion_matrix.png)
+
+## What changed from the original project archive
+
+This repository has been consolidated around the **final ResNet-50 pipeline** used for the presentation. Exploratory Random Forest, custom CNN, FFT, PCA, duplicate deployment experiments, the unfinished React frontend, and stale result artifacts were removed from the main code path. Their role in the project is documented in [`docs/project-history.md`](docs/project-history.md).
+
+One integrity issue was important enough **not** to hide: the checkpoint bundled inside the original API/Streamlit folders was an **older epoch-9 model** with threshold `0.50`, dropout `0.40`, and no BatchNorm layer in the classifier head. The true final checkpoint was recovered from the project's `deepfake_detection_checkpoints` artifact archive produced by the executed notebook originally named `training_exploration_reinteration_kristine.ipynb`. The recovered model is epoch 13, uses the final BatchNorm + Dropout 0.30 head, and stores the selected threshold `0.51`. It is now included at `models/best_resnet50.pth` and verified before deployment.
+
+## Method
+
+```mermaid
+flowchart LR
+    A[RGB face image] --> B[Resize 224 × 224]
+    B --> C[ImageNet normalization]
+    C --> D[ResNet-50 backbone]
+    D --> E[Global average pooling]
+    E --> F[Linear 2048 → 256]
+    F --> G[BatchNorm + ReLU + Dropout 0.30]
+    G --> H[Linear 256 → 1]
+    H --> I[Sigmoid synthetic score]
+    I --> J{score ≥ 0.51?}
+    J -->|Yes| K[Synthetic / Fake]
+    J -->|No| L[Real]
+```
+
+### Final training configuration
+
+- **Dataset:** Kaggle *140k Real and Fake Faces* — FFHQ real faces + StyleGAN synthetic faces.
+- **Splits used:** 100,000 train, 20,000 validation, 20,000 locked test images.
+- **Input:** RGB, `224 × 224`, ImageNet normalization.
+- **Training augmentation only:** horizontal flip (`p=0.5`) and light color jitter.
+- **Stage 1:** freeze the pretrained backbone and train the new classifier head for 3 epochs.
+- **Stage 2:** unfreeze ResNet-50 `layer4` and fine-tune it with the head.
+- **Loss:** `BCEWithLogitsLoss`.
+- **Optimizer:** Adam, weight decay `1e-4`.
+- **Learning rates:** head `5e-4`; `layer4` `1e-5` when fine-tuning starts.
+- **Seed:** 13; batch size 32; maximum 15 epochs.
+- **Threshold selection:** validation sweep from `0.05` to `0.95` in `0.01` increments, maximizing Fake F1.
+- **Selected model:** epoch 13 at threshold `0.51`.
+
+The final notebook's implementation monitors **validation Fake F1** for checkpointing. Epoch 13 also has the **lowest recorded validation loss**, which is why the final presentation's “lowest validation loss” description identifies the same checkpoint.
+
+![Training loss](assets/resnet50_loss_curves.png)
+![Validation metrics by epoch](assets/validation_metrics_by_epoch.png)
+
+## Repository layout
+
+```text
+SyntheticSight_Final/
+├── README.md
+├── assets/                         # Final-run plots used by the documentation
 ├── deployment/
-│   └── streamlit/          # Streamlit web application code
-├── docs/                   # References and project documentation
-├── models/                 # Saved model weights and checkpoints
-├── notebooks/              # Core project notebooks
-│   ├── deepfake_detector.ipynb        # Exploratory data analysis & baseline setup
-│   ├── resnet50_training.ipynb        # ResNet-50 model training & evaluation
-│   └── data_bias_audit.ipynb          # Demographic and dataset bias evaluation
-├── PROJECT_SCOPE.ipynb     # Initial project scope and plan
-├── README.md               # Main repository documentation
-└── requirements.txt        # Dependencies required to run the project
-
+│   ├── streamlit_app.py            # Interactive research prototype
+│   ├── api.py                      # Reusable FastAPI inference endpoint
+│   └── Dockerfile
+├── docs/
+│   ├── architecture.md
+│   ├── bias-and-ethics.md
+│   ├── data.md
+│   ├── deployment.md
+│   ├── evaluation.md
+│   ├── project-history.md
+│   ├── references.md
+│   └── repository-review.md
+├── models/
+│   ├── model_metadata.json
+│   ├── training_history.csv
+│   ├── validation_metrics.csv
+│   ├── final_test_metrics.csv
+│   └── README.md                   # Final-checkpoint instructions
+├── notebooks/
+│   ├── 01_resnet50_final_training.ipynb
+│   └── 02_apparent_lightness_audit.ipynb
+├── scripts/verify_checkpoint.py
+├── src/synthetic_sight/            # Shared model + inference code
+└── tests/                           # Model/preprocessing contract tests
 ```
 
-## 4. Methodology & Model Architecture
-- **Data Sampling & Augmentation:** Balanced samples of real and fake images are loaded, normalized using ImageNet mean/std statistics, and fed through PyTorch DataLoader pipelines.
+## Setup
 
-- **Model Selection (ResNet-50):** We fine-tune a pre-trained ResNet-50 model for binary classification (0 = Real, 1 = Fake).
-
-* **Two-Stage Training Strategy:**
-  - **Stage 1 (Head-Only):** Trains only the new classifier head while keeping     the ResNet-50 backbone frozen.
-  - **Stage 2 (Fine-Tuning):** Unfreezes and fine-tunes `layer4` alongside the classifier head with early stopping based on validation score.
-  
-- **Data Bias Audit:** We conducted fairness and distribution checks in data_bias_audit.ipynb to evaluate model predictions across variations in lighting, background artifacts, and demographic representation.
-
-## 5. Results & Evaluation
-
-### Evaluation Plots
-
-| Loss & Accuracy Curves | Validation Metrics |
-| :---: | :---: |
-| ![Loss and Accuracy](assets/resnet50_loss_accuracy_curves.png) | ![Validation Metrics](assets/validation_metrics_by_epoch.png) |
-
-| Final Test Confusion Matrix | ROC & Precision-Recall Curves |
-| :---: | :---: |
-| ![Confusion Matrix](assets/resnet50_final_test_confusion_matrix.png) | ![ROC and PR Curves](assets/resnet50_roc_pr_curves.png) |
-
-## 6. Setup & Reproducibility Guide
-
-**Option A: Running the Notebook in Google Colab**
-- Open resnet50_training.ipynb in Google Colab.
-- Set your runtime to GPU (Runtime > Change runtime type > T4 GPU).
-- Add your Kaggle API token to Colab Secrets as KAGGLE_API_TOKEN.
-- Run all cells top-to-bottom (Runtime > Restart session and run all).
-
-**Option B: Running Streamlit Locally**
-* **Clone the repository:**
-```bash
-git clone [https://github.com/Shloka-16/deepfake-detection.git](https://github.com/Shloka-16/deepfake-detection.git)
-cd deepfake-detection
-```
-
-* **Install dependencies:**
+### 1. Create an environment
 
 ```bash
-pip install -r requirements.txt
-
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip
+pip install -e ".[app,api]"
 ```
 
-* **Launch the web application:**
+For notebook work:
 
 ```bash
-streamlit run deployment/streamlit/app.py
-
+pip install -e ".[research,dev]"
 ```
 
-## 7. Ethical Considerations & Limitations
+### 2. Verify the included final checkpoint
 
-Deepfake and synthetic face technologies introduce significant privacy, security, and trust risks. Synthetic Sight is explicitly intended for research and defensive detection use cases (e.g., understanding vulnerabilities, building detection tools), and must not be used to create, disseminate, or legitimize harmful synthetic media.
+The verified **epoch-13 final checkpoint** is included at:
 
-**1. Misuse and privacy risks**
+```text
+models/best_resnet50.pth
+```
 
-Deepfake content can be weaponized for harassment, impersonation, fraud, and non‑consensual imagery. This project should never be used to assist in producing or spreading such content. Any real‑world deployment of this model must comply with applicable privacy, data protection, and digital safety regulations and include clear disclosure to affected users.
+Verify its architecture and metadata contract before deployment:
 
-**2. Dataset and model biases**
+```bash
+python scripts/verify_checkpoint.py models/best_resnet50.pth
+```
 
-The Kaggle dataset combines FFHQ and StyleGAN‑generated faces, both of which may under‑represent certain demographic groups (e.g., age ranges, skin tones, cultural backgrounds), and over‑represent others. As a result, model performance may vary across demographics and visual conditions (lighting, background, accessories), and high accuracy on aggregate metrics does not guarantee fairness for everyone. Our data bias audit notebook (data_bias_audit.ipynb) should be used to periodically evaluate and document performance differences across subgroups, and any gaps should be clearly disclosed rather than hidden.
+Expected SHA-256:
 
-**3. Limitations of scope and generalization**
+```text
+d9a7fd6a692c942b550f9848500dc3ffb10d5809cb0d0091990648bf369ad21c
+```
 
-The current model is trained only on cropped human face images from a specific Kaggle dataset and evaluated within that distribution. It may not generalize reliably to other domains such as full‑body deepfakes, video sequences, non‑human subjects, or images generated by newer models not represented in the training data. Predictions should be treated as probabilistic signals, not ground truth; manual review and complementary checks are recommended in any high‑stakes setting.
+The validator checks the final architecture contract, epoch, label mapping, and threshold. A legacy artifact fails rather than silently producing mismatched predictions.
 
-**4. Responsible deployment guidelines**
+### 3. Run the Streamlit prototype
 
-Avoid deploying this model as a fully automated decision system in high‑impact contexts (e.g., content takedowns, legal processes) without human oversight and documented procedures for appeals and error handling. 
-Include transparency notes for users (what data the model was trained on, where it is likely to fail, and how predictions should be interpreted). Regularly retrain or re‑evaluate the model as generative techniques evolve to avoid a false sense of security from stale performance metrics. By explicitly documenting these ethical considerations and technical limitations, we aim to encourage responsible research, highlight fairness concerns, and reduce the likelihood of harmful or misleading use of Synthetic Sight.
+```bash
+streamlit run deployment/streamlit_app.py
+```
 
-## 8. Team Contributions
+### 4. Run the FastAPI service
 
-* **Team 9C (Synthetic Sight):** Collaborative work on model training pipelines, data preprocessing, bias auditing, web app deployment, and documentation.
+```bash
+uvicorn deployment.api:app --reload
+```
 
+Interactive API documentation is available at `/docs` while the service is running.
+
+## Evaluation
+
+The official test set contains 10,000 real and 10,000 synthetic images and was evaluated only after development decisions were complete.
+
+| Ground truth | Predicted Real | Predicted Synthetic |
+|---|---:|---:|
+| Real (10,000) | **9,961** TN | **39** FP |
+| Synthetic (10,000) | **23** FN | **9,977** TP |
+
+![ROC and precision-recall curves](assets/resnet50_roc_pr_curves.png)
+
+See [`docs/evaluation.md`](docs/evaluation.md) for metric definitions, threshold interpretation, and error analysis.
+
+## Bias, representation, and responsible use
+
+Balanced Real/Fake classes do **not** establish demographic fairness. The project therefore added a preliminary apparent-lightness audit using OpenCV face detection, forehead/cheek sampling, and CIE Lab `L*`. This is a measurable image characteristic—not race, ethnicity, gender, ancestry, or inherent skin color—and it is sensitive to lighting, exposure, editing, makeup, and face-detection errors.
+
+![Relative apparent-lightness bands](assets/apparent_lightness_relative_bands.png)
+
+The detector should **flag content for review**, not authenticate it. False positives can cast doubt on legitimate images; false negatives can create false reassurance. See [`docs/bias-and-ethics.md`](docs/bias-and-ethics.md).
+
+## Reproducibility notes
+
+- Training and validation file paths were checked for zero overlap.
+- The test split stayed locked until checkpoint and threshold decisions were complete.
+- The final training provenance traces to the executed source notebook `training_exploration_reinteration_kristine.ipynb`; the polished repository includes its consolidated counterpart as `notebooks/01_resnet50_final_training.ipynb`.
+- The notebook records the sample configuration, labels, seed, transforms, training schedule, checkpoint metadata, and evaluation logic.
+- The final repository deliberately rejects legacy checkpoints whose architecture metadata does not match the final run.
+- A stronger future audit should also check image near-duplicates and source-level correlations.
+
+## Next steps
+
+1. Test the existing model on **unseen generator families before retraining** to measure generator drift.
+2. Evaluate compression, resizing, screenshots, filters, and other real-world transformations.
+3. Join apparent-lightness audit rows to prediction/error records and compare error rates with sample sizes and uncertainty.
+4. Evaluate probability calibration rather than assuming model scores are literal real-world probabilities.
+5. Extend beyond still images with video-specific, spatiotemporal benchmarks and architectures.
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Dataset and data protocol](docs/data.md)
+- [Evaluation and metrics](docs/evaluation.md)
+- [Bias and ethics](docs/bias-and-ethics.md)
+- [Deployment](docs/deployment.md)
+- [Project evolution](docs/project-history.md)
+- [Repository review and consolidation decisions](docs/repository-review.md)
+- [References](docs/references.md)
+
+## References
+
+Core references include He et al. (2016) for ResNet, Deng et al. (2009) for ImageNet, Karras et al. (2019) for StyleGAN, Mo (2020) for the benchmark dataset, and Nightingale & Farid (2022) for the human-perception motivation. Full citations are in [`docs/references.md`](docs/references.md).
+
+---
+
+**Use statement:** Synthetic Sight is an educational research prototype. Its output is a model score under a specific benchmark distribution; it should not be treated as legal proof, identity verification, provenance certification, or an automated high-impact decision.

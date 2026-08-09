@@ -1,0 +1,2 @@
+evaluation_split,images,accuracy,fake_precision,fake_recall,fake_f1,real_f1,macro_f1,weighted_f1,roc_auc_rounded,pr_auc_rounded,loss,decision_threshold,best_epoch,source_note
+Validation,20000,0.9977,0.997,0.9984,0.9977,0.9977,0.9977,0.9977,0.9999,0.9999,0.0077,0.51,13,Executed final training notebook; rounded display values

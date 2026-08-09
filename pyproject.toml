@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synthetic-sight"
+version = "1.0.0"
+description = "ResNet-50 research prototype for detecting StyleGAN-generated face images"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "Pillow>=10.0",
+  "torch>=2.2",
+  "torchvision>=0.17",
+]
+
+[project.optional-dependencies]
+app = ["streamlit>=1.38"]
+api = ["fastapi>=0.112", "uvicorn[standard]>=0.30", "python-multipart>=0.0.9"]
+research = [
+  "pandas>=2.2",
+  "scikit-learn>=1.4",
+  "matplotlib>=3.8",
+  "opencv-python-headless>=4.9",
+  "kaggle>=1.6",
+  "jupyter>=1.0",
+]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

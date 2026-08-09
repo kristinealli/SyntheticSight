@@ -1,31 +1,30 @@
-# macOS
-.DS_Store
-
 # Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
 .venv/
 venv/
-__pycache__/
-*.pyc
+
+# Notebook / editor
 .ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/
 
-# Keep original training models out of ordinary Git
-/models/*.pth
-/models/*.pt
-/models/*.ckpt
-/models/*.onnx
-/models/*.onnx.data
-/models/*.npz
-
-# Local datasets
+# Data is downloaded from Kaggle and is not committed.
 data/raw/
-data/processed/
+data/real_vs_fake/
+real_vs_fake/
 
-# Uploaded/test images
-uploads/
+# Large model artifacts. Track deliberately with Git LFS if publishing them.
+models/*.pth
+!models/best_resnet50.pth
+models/*.pt
+models/*.onnx
+models/*.onnx.data
 
-# Secrets and environment variables
-.env
-.env.*
-*.pem
-*.key
-kaggle.json
+# Local outputs
+artifacts/
+outputs/
+*.npz
