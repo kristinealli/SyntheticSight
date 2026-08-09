@@ -2,15 +2,17 @@
 
 ## Core principle
 
-Synthetic Sight can reduce some inconsistency in human visual judgment, but it can also encode dataset gaps, learn source shortcuts, and encourage user overconfidence. Responsible use requires keeping those limits visible.
+Synthetic Sight is an image-level classifier that provides a review signal for the project’s real-versus-synthetic face-image task. It can reduce inconsistency in human visual judgment, but it may also reflect dataset gaps, rely on source-specific artifacts, and encourage overconfidence in a probability score. Results should never be treated as proof of authenticity or manipulation.
+
+This project does not claim to detect all deepfakes or to generalize reliably to new generators, video, face swaps, heavily edited images, or conditions not represented in its evaluation data.
 
 ## How bias can enter the system
 
-- **Representation gaps:** error rates may vary across underrepresented people or image conditions even when aggregate accuracy is high.
-- **Generator drift:** a StyleGAN detector may not transfer to diffusion models, face swaps, video, or future generators.
-- **Shortcut learning:** the network may exploit cropping, resolution, compression, lighting, or background cues associated with benchmark sources.
-- **Evaluation bias:** repeated use of a test set can turn it into another development set and inflate reported performance.
-- **Interface overtrust:** a polished probability display can make a model score look more certain than it is.
+**Representation gaps:** error rates may vary across underrepresented people or image conditions even when aggregate accuracy is high.
+**Generator drift:** a StyleGAN detector may not transfer to diffusion models, face swaps, video, or future generators.
+**Shortcut learning:** the network may exploit cropping, resolution, compression, lighting, or background cues associated with benchmark sources.
+**Evaluation bias:** repeated use of a test set can turn it into another development set and inflate reported performance.
+**Interface overtrust:** a polished probability display can make a model score look more certain than it is.
 
 ## Preliminary apparent-lightness audit
 
@@ -39,7 +41,7 @@ The detector itself therefore changes which images receive an `L*` measurement a
 
 ### Relative lightness bands
 
-The measured real and synthetic samples had broadly comparable average apparent lightness, while their distributions across relative bands differed. Comparable means do not prove equivalent representation or equivalent error rates.
+In this validation sample, the real and synthetic images had similar average measured L* values. This descriptive result does not establish comparable representation, demographic balance, or comparable model performance across image-lightness conditions. Relative lightness bands were created using fixed L* ranges; they are analytical bins, not demographic categories.
 
 ![Relative apparent-lightness bands](../assets/apparent_lightness_relative_bands.png)
 
@@ -53,16 +55,8 @@ The measured real and synthetic samples had broadly comparable average apparent 
 - Preliminary representation audit with limitations documented.
 - Deployment language that describes results as review signals, not proof.
 
-## Recommended next audit
 
-Join every audit measurement to the corresponding prediction and error record. Then compare false-positive and false-negative rates across sufficiently populated apparent-lightness bands, reporting sample sizes and uncertainty. This would answer a model-performance question that the current representation plots alone cannot answer.
+## Privacy: 
 
-## Prohibited interpretation
-
-Do not say that:
-
-- the system detects **all** deepfakes;
-- a Real result proves authenticity;
-- balanced classes prove demographic fairness;
-- `L*` measurements identify race or ethnicity;
-- the app learns from uploaded images—it performs fixed-model inference only.
+Uploaded images are used only for the current inference request. The application does not use them to retrain the model
+  
