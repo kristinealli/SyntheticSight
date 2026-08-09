@@ -64,6 +64,4 @@ The API accepts JPEG, PNG, and WebP files up to 10 MB by default. The limit can 
 - `SYNTHETIC_SIGHT_MAX_UPLOAD_BYTES` — maximum upload size.
 - `SYNTHETIC_SIGHT_ALLOWED_ORIGINS` — comma-separated CORS origins; CORS is disabled unless explicitly configured.
 
-## Production boundary
 
-This code is a portfolio/research deployment, not a production trust-and-safety service. A production deployment would additionally require authentication, rate limiting, privacy and retention policies, monitoring, logging policy, secure model storage, adversarial testing, calibration, outside-dataset validation, and clear appeal/error-handling processes.
