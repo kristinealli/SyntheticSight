@@ -22,7 +22,7 @@ Linear(256 → 1)
 Sigmoid at inference
 ```
 
-The backbone itself contains standard 2-D spatial convolutions, including `1×1` pointwise and `3×3` spatial convolutions in bottleneck blocks, BatchNorm, ReLU, early max pooling, residual connections, and global/adaptive average pooling. It is **not** an Inception, Xception, DenseNet, or depthwise-separable architecture.
+The backbone itself contains standard 2-D spatial convolutions, including `1×1` pointwise and `3×3` spatial convolutions in bottleneck blocks, BatchNorm, ReLU, early max pooling, residual connections, and global/adaptive average pooling. 
 
 ## Two-stage transfer learning
 
@@ -65,6 +65,3 @@ sequenceDiagram
     T-->>U: Real or Synthetic at threshold 0.51
 ```
 
-## Why shared inference code matters
-
-The original repository had separate inference implementations with different architectures and thresholds. The final repository centralizes the model builder, checkpoint validation, preprocessing, and threshold logic in `src/synthetic_sight/`. Streamlit and FastAPI now call the **same** inference code path.
