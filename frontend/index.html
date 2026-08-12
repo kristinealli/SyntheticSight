@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Synthetic Sight — a research prototype for screening still face images for StyleGAN-like synthetic patterns."
+  />
+  <meta name="theme-color" content="#111827" />
+  <title>Synthetic Sight</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="./" aria-label="Synthetic Sight home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" role="img">
+            <path d="M4 32s10-18 28-18 28 18 28 18-10 18-28 18S4 32 4 32Z"></path>
+            <circle cx="32" cy="32" r="9"></circle>
+          </svg>
+        </span>
+        <span>
+          <strong>Synthetic Sight</strong>
+          <small>AI-generated face image screening</small>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="Project links">
+        <a href="https://github.com/kristinealli/SyntheticSight/tree/main/docs" target="_blank" rel="noreferrer">Docs</a>
+        <a href="https://github.com/kristinealli/SyntheticSight" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero shell">
+      <div class="eyebrow">AI4ALL Ignite · Summer 2026 · Team 9C</div>
+      <h1>Can a model spot an AI-generated face?</h1>
+      <p class="hero-copy">
+        Real or synthetic? Upload a clear face image to get Synthetic Sight's prediction.
+        Built on ResNet-50 transfer learning and evaluated on an FFHQ vs. StyleGAN benchmark.
+      </p>
+      <div class="hero-actions">
+        <a class="button button-secondary" id="streamlit-link"
+          href="https://syntheticsight-ai4allgroup09c.streamlit.app/"
+          target="_blank" rel="noreferrer">Open Streamlit demo</a>
+        <a class="text-link" href="https://github.com/kristinealli/SyntheticSight/blob/main/docs/bias-and-ethics.md"
+          target="_blank" rel="noreferrer">Responsible use →</a>
+      </div>
+    </section>
+
+    <section class="workspace shell" aria-labelledby="analyze-heading">
+      <div class="panel upload-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">Analyze</p>
+            <h2 id="analyze-heading">Upload a face image</h2>
+          </div>
+          <span class="format-note">JPG · PNG · WebP · max 10 MB</span>
+        </div>
+
+        <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+
+        <div
+          id="drop-zone"
+          class="drop-zone"
+          role="button"
+          tabindex="0"
+          aria-controls="file-input"
+          aria-label="Choose an image or drop an image here"
+        >
+          <div id="drop-prompt" class="drop-prompt">
+            <div class="upload-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path>
+              </svg>
+            </div>
+            <strong>Drop an image here</strong>
+            <span>or click to choose a file</span>
+          </div>
+
+          <div id="preview-wrap" class="preview-wrap" hidden>
+            <img id="image-preview" alt="Preview of selected image" />
+            <button id="change-image" class="image-action" type="button">Choose another</button>
+          </div>
+        </div>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+
+        <button id="analyze-button" class="button button-primary analyze-button" type="button" disabled>
+          Analyze image
+        </button>
+
+        <p class="privacy-note">
+          Uploaded images are not saved. They are used only for the current prediction request.
+        </p>
+      </div>
+
+      <aside class="panel result-panel" aria-labelledby="result-heading">
+        <div id="result-empty" class="result-empty">
+          <div class="result-icon" aria-hidden="true">01</div>
+          <h2 id="result-heading">Your result will appear here</h2>
+          <p>
+            Synthetic Sight returns a screening label and model scores for Real and Synthetic.
+            Scores should not be treated as authentication or proof.
+          </p>
+        </div>
+
+        <div id="result-content" hidden>
+          <p class="section-kicker">Screening result</p>
+          <div class="result-title-row">
+            <div>
+              <h2 id="result-label">—</h2>
+              <p id="result-summary" class="result-summary"></p>
+            </div>
+            <span id="result-badge" class="result-badge"></span>
+          </div>
+
+          <div class="score-block">
+            <div class="score-row">
+              <div class="score-label">
+                <span>Synthetic score</span>
+                <strong id="synthetic-score">—</strong>
+              </div>
+              <div class="meter" aria-hidden="true">
+                <span id="synthetic-meter"></span>
+              </div>
+            </div>
+
+            <div class="score-row">
+              <div class="score-label">
+                <span>Real score</span>
+                <strong id="real-score">—</strong>
+              </div>
+              <div class="meter" aria-hidden="true">
+                <span id="real-meter"></span>
+              </div>
+            </div>
+          </div>
+
+          <dl class="result-meta">
+            <div>
+              <dt>Decision threshold</dt>
+              <dd id="threshold">—</dd>
+            </div>
+            <div>
+              <dt>Model</dt>
+              <dd>ResNet-50</dd>
+            </div>
+          </dl>
+
+          <div class="caveat">
+            <strong>Interpret with care.</strong>
+            <p id="caveat-text">
+              Screening indication only; this prediction does not authenticate image provenance.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="model-strip shell" aria-label="Model summary">
+      <div>
+        <span>Held-out test set</span>
+        <strong>20,000 images</strong>
+      </div>
+      <div>
+        <span>Benchmark accuracy</span>
+        <strong>99.69%</strong>
+      </div>
+      <div>
+        <span>Fake F1</span>
+        <strong>99.69%</strong>
+      </div>
+      <div>
+        <span>Operating threshold</span>
+        <strong>0.51</strong>
+      </div>
+    </section>
+
+    <section class="scope shell">
+      <div>
+        <p class="section-kicker">Scope matters</p>
+        <h2>A strong benchmark result is not universal deepfake detection.</h2>
+      </div>
+      <p>
+        Synthetic Sight was trained on a narrow, still-image task: distinguishing real FFHQ faces from StyleGAN-generated faces.
+        Its performance should not be assumed to generalize to newer generative models, face swaps, video frames, screenshots,
+        heavily compressed images, or other out-of-distribution inputs.
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <p>Synthetic Sight · Educational research prototype</p>
+      <p>Julissa Lema · Kristine Johnson · Ricky Dixon · Shloka Kandukuri</p>
+    </div>
+  </footer>
+
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
