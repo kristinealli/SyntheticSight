@@ -144,11 +144,17 @@ class SyntheticSightDetector:
         _validate_checkpoint_contract(checkpoint)
 
         head = checkpoint["head_configuration"]
-        self.model = build_resnet50_binary(
-            hidden_units=int(head["hidden_units"]),
-            dropout=float(head["dropout"]),
-        )
-        self.model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+
+        # Build the model structure without allocating parameter storage first.
+        # The checkpoint tensors are assigned directly into the model below.
+        with torch.device("meta"):
+            self.model = build_resnet50_binary(
+                hidden_units=int(head["hidden_units"]),
+                dropout=float(head["dropout"]),
+            )
+
+        self.model.load_state_dict(
+            checkpoint["model_state_dict"], strict=True, assign=True,)
         self.model.to(self.device)
         self.model.eval()
 
