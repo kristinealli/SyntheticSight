@@ -578,6 +578,10 @@ a {
   border-radius: 4px 12px 12px 4px;
 }
 
+.caveat strong {
+  color: #D25149;
+}
+
 .caveat p {
   margin: 5px 0 0;
   color: #4b5563;
