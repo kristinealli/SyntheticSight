@@ -57,7 +57,8 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
         )
 
     try:
-        checkpoint = torch.load(path, map_location=device, weights_only=True)
+        checkpoint = torch.load(path, map_location=device,
+                                weights_only=True, mmap=True,)
     except TypeError:  # older PyTorch
         checkpoint = torch.load(path, map_location=device)
     except (pickle.UnpicklingError, RuntimeError) as exc:
@@ -117,7 +118,8 @@ def _build_transform(checkpoint: dict[str, Any]) -> transforms.Compose:
     std = tuple(checkpoint.get("normalize_std", IMAGENET_STD))
     return transforms.Compose(
         [
-            transforms.Resize(image_size, interpolation=InterpolationMode.BILINEAR),
+            transforms.Resize(
+                image_size, interpolation=InterpolationMode.BILINEAR),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
         ]
@@ -197,4 +199,5 @@ class SyntheticSightDetector:
                 image.load()
                 return self.predict(image)
         except (OSError, ValueError) as exc:
-            raise ValueError("The uploaded file is not a readable image.") from exc
+            raise ValueError(
+                "The uploaded file is not a readable image.") from exc
