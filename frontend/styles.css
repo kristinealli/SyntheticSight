@@ -747,3 +747,11 @@ a {
     margin-top: 6px;
   }
 }
+
+/* Respect UI elements hidden by JavaScript */
+.drop-prompt[hidden],
+.preview-wrap[hidden],
+#result-empty[hidden],
+#result-content[hidden] {
+  display: none !important;
+}
