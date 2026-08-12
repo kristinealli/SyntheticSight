@@ -211,7 +211,7 @@
 			}
 
 			renderResult(payload);
-			setStatus("Analysis complete.");
+			setStatus("✓ Analysis complete.");
 		} catch (error) {
 			const message =
 				error instanceof TypeError
@@ -220,7 +220,9 @@
 			setStatus(message, true);
 		} finally {
 			analyzeButton.disabled = false;
-			analyzeButton.textContent = "Analyze image";
+			analyzeButton.textContent = resultContent.hidden
+				? "Analyze image"
+				: "Analyze again";
 		}
 	});
 
