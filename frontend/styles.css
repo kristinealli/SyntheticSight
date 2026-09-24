@@ -1178,7 +1178,7 @@ p {
   padding: 1rem 1.15rem;
   border-left: 4px solid var(--purple, #6c3cff);
   background: rgba(108, 60, 255, 0.08);
-  color: var(--text, #0b1118);
+  color: var(--text, var(--teal, #74d2cd));
   font-size: 0.95rem;
   line-height: 1.6;
 }
