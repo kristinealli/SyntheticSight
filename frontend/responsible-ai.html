@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Responsible AI, bias risks, representation audit, and limitations for Synthetic Sight." />
+  <meta name="theme-color" content="#0b1118" />
+  <title>Responsible AI · Synthetic Sight</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="./index.html" aria-label="Synthetic Sight home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M4 32s10-18 28-18 28 18 28 18-10 18-28 18S4 32 4 32Z"></path><circle cx="32" cy="32" r="9"></circle></svg></span><span><strong class="brand-title"><span class="brand-synthetic">Synthetic</span> <span class="brand-sight">Sight</span></strong><small>AI-generated face detection · media literacy</small></span></a>
+      <nav class="nav-links" aria-label="Project links"><a href="./index.html">Demo</a><a href="./results.html">Results</a><a href="./methodology.html">Method</a><a class="active" href="./responsible-ai.html">Responsible AI</a><a class="nav-github" href="https://github.com/kristinealli/SyntheticSight" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero shell">
+      <div class="eyebrow">Bias &amp; Ethical Considerations</div>
+      <h1>Accuracy without<br /><span class="accent-text">overtrust.</span></h1>
+      <p class="hero-copy">Synthetic Sight is a research prototype and screening aid. The development process can reduce some risks through data controls, transparent evaluation, and representation checks—but it cannot erase the limits of the benchmark.</p>
+    </section>
+
+    <section class="responsibility-grid shell" aria-label="Responsible AI principles">
+      <article><span>01</span><h2>Screen, don't authenticate.</h2><p>A classifier score is one review signal. It cannot prove who created an image, how it was edited, or whether its provenance is genuine.</p></article>
+      <article><span>02</span><h2>Keep the claim narrow.</h2><p>The model was trained on FFHQ real faces and StyleGAN synthetic faces. New generators and real-world image conditions may behave differently.</p></article>
+      <article><span>03</span><h2>Make uncertainty visible.</h2><p>The interface reports class scores, the decision threshold, and caution text instead of presenting the label as unquestionable truth.</p></article>
+    </section>
+
+    <section class="poster-section shell" aria-labelledby="bias-heading">
+      <span class="section-number">6</span><span class="vertical-label">Model Risks &amp; Mitigation</span>
+      <div class="section-heading-row"><div><p class="section-kicker">Bias can be amplified—or mitigated</p><h2 id="bias-heading">The same polished detector can create confidence or confusion depending on how its limits are communicated.</h2></div><p>Bias is not a single property that disappears after training. It can enter through representation, the generator used to create synthetic images, preprocessing artifacts, evaluation choices, and the way people interpret the interface.</p></div>
+      <div class="dual-grid">
+        <section class="bias-column" aria-labelledby="amplified-heading">
+          <h2 id="amplified-heading">How bias can be amplified</h2>
+          <div class="bias-list">
+            <div class="bias-item"><strong>Demographic gaps</strong><p>Underrepresented groups may experience uneven detector performance.</p></div>
+            <div class="bias-item"><strong>Generator drift</strong><p>StyleGAN data may not represent newer diffusion models or future generators.</p></div>
+            <div class="bias-item"><strong>Shortcut learning</strong><p>Compression, cropping, lighting, or other artifacts can become unintended predictive shortcuts.</p></div>
+            <div class="bias-item"><strong>Overtrust</strong><p>A polished result can create unwarranted confidence without appropriate context.</p></div>
+          </div>
+        </section>
+        <section class="bias-column mitigate" aria-labelledby="mitigated-heading">
+          <h2 id="mitigated-heading">How bias can be mitigated</h2>
+          <div class="bias-list">
+            <div class="bias-item"><strong>Subgroup audits</strong><p>Evaluate performance by subgroup or visual condition when defensible labels are available.</p></div>
+            <div class="bias-item"><strong>Standardization</strong><p>Use uniform image size, format, normalization, and face-preparation rules.</p></div>
+            <div class="bias-item"><strong>Out-of-distribution tests</strong><p>Test outside datasets and generator families to define generalization bounds.</p></div>
+            <div class="bias-item"><strong>Transparent UI</strong><p>Report scores, limitations, false-positive risks, and false-negative risks.</p></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="poster-section purple-panel shell" aria-labelledby="audit-heading">
+      <span class="section-number purple">7</span><span class="vertical-label">Facial Tone &amp; Representation Audit</span>
+      <div class="two-column-feature">
+        <div class="section-copy">
+          <p class="section-kicker">Representation check</p>
+          <h2 id="audit-heading">We measured visible image lightness—not race, ethnicity, or gender.</h2>
+          <p>The audit used face detection and CIE Lab L* to summarize the apparent lightness of forehead and cheek regions. Average visible lightness was comparable between real and synthetic validation images, although the distribution across bands differed.</p>
+          <div class="caution-box"><strong>Important distinction</strong><p>These measurements describe visible image characteristics affected by lighting, exposure, camera processing, makeup, editing, and face-detection crop errors. They are not demographic labels or a fairness certification.</p></div>
+        </div>
+        <figure class="chart-card"><img src="./assets/apparent_lightness_validation_distribution.png" alt="Validation distribution of measured apparent facial lightness for real and synthetic images." /><figcaption>Validation apparent-lightness distribution · descriptive only</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="content-section shell">
+      <div class="section-heading-row"><div><p class="section-kicker">A limitation inside the audit</p><h2>Face detection changes which images enter the analysis.</h2></div><p>The face detector succeeded slightly more often on synthetic images than real images in the audited samples. That means the lightness analysis is conditional on detection success and can inherit selection bias from that first step.</p></div>
+      <div class="audit-grid">
+        <div><span>Training synthetic</span><strong>99.32%</strong><small>4,966 / 5,000 detected</small></div>
+        <div><span>Training real</span><strong>94.24%</strong><small>4,712 / 5,000 detected</small></div>
+        <div><span>Validation synthetic</span><strong>99.20%</strong><small>992 / 1,000 detected</small></div>
+        <div><span>Validation real</span><strong>95.90%</strong><small>959 / 1,000 detected</small></div>
+      </div>
+      <figure class="chart-card chart-full"><img src="./assets/apparent_lightness_relative_bands.png" alt="Relative apparent-lightness bands comparing real and synthetic validation images." /><figcaption>Relative apparent-lightness bands · not demographic categories</figcaption></figure>
+    </section>
+
+    <section class="insight-band"><div class="shell insight-inner"><div><p class="section-kicker">Next audit step</p><h2>Connect representation directly to prediction errors.</h2></div><p>The next useful analysis is to join lightness-audit rows directly to prediction error logs so potential performance disparities can be tested rather than inferred from representation alone.</p></div></section>
+
+    <section class="content-section shell"><div class="limits-panel"><p class="section-kicker">Do not use this result as</p><div class="limits-list"><span>proof that an image is authentic</span><span>proof that an image is AI-generated</span><span>a demographic classifier</span><span>a production moderation system</span><span>a universal detector for every generator</span><span>a fairness certification</span></div></div></section>
+
+    <section class="content-section shell"><div class="next-grid"><a class="next-card" href="./results.html"><span>Performance</span><strong>See the final test results</strong><p>Accuracy, error counts, confusion matrix, ROC–AUC, and score separation.</p></a><a class="next-card" href="./methodology.html"><span>Reproducibility</span><strong>See how it was built</strong><p>Data splits, preprocessing, architecture, transfer learning, and threshold selection.</p></a></div></section>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-inner"><p>Synthetic Sight · AI4ALL Ignite Summer 2026 · Group 09C</p><p class="footer-team">Julissa Lema · Kristine Johnson · Ricky Dixon · Shloka Kandukuri</p></div></footer>
+</body>
+</html>

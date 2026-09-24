@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Synthetic Sight final model results on the locked 20,000-image test set." />
+  <meta name="theme-color" content="#0b1118" />
+  <title>Results · Synthetic Sight</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="./index.html" aria-label="Synthetic Sight home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M4 32s10-18 28-18 28 18 28 18-10 18-28 18S4 32 4 32Z"></path><circle cx="32" cy="32" r="9"></circle></svg></span>
+        <span><strong class="brand-title"><span class="brand-synthetic">Synthetic</span> <span class="brand-sight">Sight</span></strong><small>AI-generated face detection · media literacy</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Project links">
+        <a href="./index.html">Demo</a><a class="active" href="./results.html">Results</a><a href="./methodology.html">Method</a><a href="./responsible-ai.html">Responsible AI</a><a class="nav-github" href="https://github.com/kristinealli/SyntheticSight" target="_blank" rel="noreferrer">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero shell">
+      <div class="eyebrow">Final Test Performance · Locked Benchmark</div>
+      <h1>20,000 images.<br /><span class="accent-text">62 mistakes.</span></h1>
+      <p class="hero-copy">The final ResNet-50 correctly classified 19,938 of 20,000 held-out images in the balanced FFHQ vs. StyleGAN benchmark. The test set stayed locked until development decisions were complete.</p>
+    </section>
+
+    <section class="results-band shell" aria-label="Final test metrics">
+      <div class="metric-grid">
+        <article class="metric-card metric-primary"><span>Test accuracy</span><strong>99.69%</strong><p>19,938 / 20,000 correct</p></article>
+        <article class="metric-card"><span>Synthetic F1</span><strong>99.69%</strong><p>Precision + recall balance</p></article>
+        <article class="metric-card"><span>ROC–AUC</span><strong>99.995%</strong><p>0.99995 ranking performance</p></article>
+        <article class="metric-card"><span>Threshold</span><strong>0.51</strong><p>Selected using validation data</p></article>
+      </div>
+    </section>
+    
+    <section class="poster-section shell" aria-labelledby="errors-heading">
+      <div class="section-heading">
+        <p class="section-kicker purple">Error analysis</p>
+        <h2 id="errors-heading">
+          What did the model get wrong?
+        </h2>
+    
+        <p>
+          Of 20,000 held-out test images, the model misclassified 62:
+          39 real images were flagged as synthetic and 23 synthetic
+          images were classified as real.
+        </p>
+      </div>
+    
+      <div class="error-analysis-grid">
+    
+        <article class="error-card">
+          <div class="error-card-heading">
+            <div>
+              <p class="section-kicker">False positives</p>
+              <h3>Real faces classified as synthetic</h3>
+            </div>
+            <strong class="error-count">39</strong>
+          </div>
+    
+          <figure class="project-figure">
+            <img src="./assets/false-positives-39.png"
+              alt="Grid showing the 39 real test images incorrectly classified as synthetic." />
+          </figure>
+    
+          <p>
+            A false positive incorrectly flags an authentic image.
+            In real-world use, this type of error could undermine trust
+            in legitimate content.
+          </p>
+        </article>
+    
+    
+        <article class="error-card">
+          <div class="error-card-heading">
+            <div>
+              <p class="section-kicker">False negatives</p>
+              <h3>Synthetic faces classified as real</h3>
+            </div>
+            <strong class="error-count">23</strong>
+          </div>
+    
+          <figure class="project-figure">
+            <img src="./assets/false-negatives-23.jpeg"
+              alt="Grid showing the 23 synthetic test images incorrectly classified as real." />
+          </figure>
+    
+          <p>
+            A false negative allows a synthetic image to pass without
+            being flagged. This is one reason the detector should be
+            treated as a screening signal rather than proof of authenticity.
+          </p>
+        </article>
+    
+      </div>
+    </section>
+
+    <section class="poster-section shell" aria-labelledby="confusion-heading">
+      <span class="section-number">5</span>
+      <span class="vertical-label">Final Test Performance</span>
+      <div class="two-column-feature">
+        <div class="section-copy">
+          <p class="section-kicker">Derived test confusion matrix</p>
+          <h2 id="confusion-heading">The errors were small, but they still carry weight.</h2>
+          <p>Of 10,000 real images, <strong>39 were incorrectly flagged as synthetic</strong>. Of 10,000 synthetic images, <strong>23 were incorrectly labeled real</strong>. That leaves 9,961 true negatives and 9,977 true positives.</p>
+          <div class="mini-stats">
+            <div><span>Real → Synthetic</span><strong>39</strong><small>false positives | Type 1 Error</small></div>
+            <div><span>Synthetic → Real</span><strong>23</strong><small>false negatives | Type 2 Error</small></div>
+          </div>
+          <div class="error-callout" style="margin-top:14px"><strong>Why that matters:</strong> false positives can damage trust in authentic content, while false negatives can create a false sense of security.</div>
+        </div>
+        <figure class="chart-card">
+          <img src="./assets/resnet50_final_test_confusion_matrix.png" alt="Final test confusion matrix: 9,961 true negatives, 39 false positives, 23 false negatives, and 9,977 true positives." />
+          <figcaption>Locked 20,000-image test split · 10,000 real / 10,000 synthetic</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="poster-section slate-panel shell" aria-labelledby="separation-heading">
+      <span class="section-number purple">6</span>
+      <span class="vertical-label">Score Separation</span>
+      <div class="section-heading-row">
+        <div><p class="section-kicker">Performance across thresholds</p><h2 id="separation-heading">The benchmark classes separated extremely cleanly.</h2></div>
+        <p>ROC–AUC summarizes ranking performance across many thresholds rather than accuracy at a single threshold. The test probability distribution shows most examples pushed strongly toward the correct end of the scale.</p>
+      </div>
+      <div class="chart-grid">
+        <figure class="chart-card"><img src="./assets/resnet50_roc_pr_curves.png" alt="ROC and precision-recall curves for the final ResNet-50 model." /><figcaption>ROC and precision–recall curves</figcaption></figure>
+        <figure class="chart-card"><img src="./assets/test_probability_distribution.png" alt="Distribution of synthetic probability scores on the held-out test set." /><figcaption>Held-out test probability distribution</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="insight-band">
+      <div class="shell insight-inner">
+        <div><p class="section-kicker">Interpretation</p><h2>Excellent on this benchmark. Not universal authentication.</h2></div>
+        <p>The model learned one benchmark built primarily from FFHQ real faces and StyleGAN-generated synthetic faces. Performance should not automatically be extended to diffusion models, face swaps, video, screenshots, aggressive compression, or future generators.</p>
+      </div>
+    </section>
+
+    <section class="content-section shell">
+      <div class="next-grid">
+        <a class="next-card" href="./methodology.html"><span>How it was built</span><strong>Model architecture + training</strong><p>See the 224 × 224 preprocessing pipeline, transfer-learning stages, checkpoint selection, and threshold logic.</p></a>
+        <a class="next-card" href="./responsible-ai.html"><span>What the score cannot tell you</span><strong>Responsible AI + representation</strong><p>Review bias risks, mitigation choices, the facial-lightness audit, and the boundaries of the claim.</p></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-inner"><p>Synthetic Sight · AI4ALL Ignite Summer 2026 · Group 09C</p><p class="footer-team">Julissa Lema · Kristine Johnson · Ricky Dixon · Shloka Kandukuri</p></div></footer>
+</body>
+</html>

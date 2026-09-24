@@ -1,230 +1,208 @@
 (() => {
-	"use strict";
+  "use strict";
 
-	const config = window.SYNTHETIC_SIGHT_CONFIG || {};
-	const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
-	const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+  const config = window.SYNTHETIC_SIGHT_CONFIG || {};
+  const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+  const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-	const fileInput = document.querySelector("#file-input");
-	const dropZone = document.querySelector("#drop-zone");
-	const dropPrompt = document.querySelector("#drop-prompt");
-	const previewWrap = document.querySelector("#preview-wrap");
-	const imagePreview = document.querySelector("#image-preview");
-	const changeImageButton = document.querySelector("#change-image");
-	const analyzeButton = document.querySelector("#analyze-button");
-	const statusBox = document.querySelector("#status");
+  const fileInput = document.querySelector("#file-input");
+  const dropZone = document.querySelector("#drop-zone");
+  const dropPrompt = document.querySelector("#drop-prompt");
+  const previewWrap = document.querySelector("#preview-wrap");
+  const imagePreview = document.querySelector("#image-preview");
+  const changeImageButton = document.querySelector("#change-image");
+  const analyzeButton = document.querySelector("#analyze-button");
+  const statusBox = document.querySelector("#status");
 
-	const resultEmpty = document.querySelector("#result-empty");
-	const resultContent = document.querySelector("#result-content");
-	const resultLabel = document.querySelector("#result-label");
-	const resultSummary = document.querySelector("#result-summary");
-	const resultBadge = document.querySelector("#result-badge");
-	const syntheticScore = document.querySelector("#synthetic-score");
-	const realScore = document.querySelector("#real-score");
-	const syntheticMeter = document.querySelector("#synthetic-meter");
-	const realMeter = document.querySelector("#real-meter");
-	const threshold = document.querySelector("#threshold");
-	const caveatText = document.querySelector("#caveat-text");
-	const streamlitLink = document.querySelector("#streamlit-link");
+  const resultEmpty = document.querySelector("#result-empty");
+  const resultContent = document.querySelector("#result-content");
+  const resultLabel = document.querySelector("#result-label");
+  const resultSummary = document.querySelector("#result-summary");
+  const resultBadge = document.querySelector("#result-badge");
+  const syntheticScore = document.querySelector("#synthetic-score");
+  const realScore = document.querySelector("#real-score");
+  const syntheticMeter = document.querySelector("#synthetic-meter");
+  const realMeter = document.querySelector("#real-meter");
+  const threshold = document.querySelector("#threshold");
+  const caveatText = document.querySelector("#caveat-text");
+  const streamlitLink = document.querySelector("#streamlit-link");
 
-	let selectedFile = null;
-	let previewUrl = null;
+  if (!fileInput || !dropZone || !analyzeButton) return;
 
-	if (config.streamlitUrl) {
-		streamlitLink.href = config.streamlitUrl;
-	}
+  let selectedFile = null;
+  let previewUrl = null;
 
-	function setStatus(message = "", isError = false) {
-		statusBox.textContent = message;
-		statusBox.classList.toggle("is-error", isError);
-	}
+  if (streamlitLink && config.streamlitUrl) {
+    streamlitLink.href = config.streamlitUrl;
+  }
 
-	function formatPercent(value) {
-		const numeric = Number(value);
-		if (!Number.isFinite(numeric)) return "—";
-		return `${(numeric * 100).toFixed(2)}%`;
-	}
+  function setStatus(message = "", isError = false) {
+    statusBox.textContent = message;
+    statusBox.classList.toggle("is-error", isError);
+  }
 
-	function validateFile(file) {
-		if (!file) return "Choose an image first.";
-		if (!ALLOWED_TYPES.has(file.type)) {
-			return "Use a JPG, PNG, or WebP image.";
-		}
-		if (file.size > MAX_UPLOAD_BYTES) {
-			return "The image is larger than the 10 MB upload limit.";
-		}
-		return null;
-	}
+  function formatPercent(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return "—";
+    return `${(numeric * 100).toFixed(2)}%`;
+  }
 
-	function clearPreviewUrl() {
-		if (previewUrl) {
-			URL.revokeObjectURL(previewUrl);
-			previewUrl = null;
-		}
-	}
+  function validateFile(file) {
+    if (!file) return "Choose an image first.";
+    if (!ALLOWED_TYPES.has(file.type)) return "Use a JPG, PNG, or WebP image.";
+    if (file.size > MAX_UPLOAD_BYTES) return "The image is larger than the 10 MB upload limit.";
+    return null;
+  }
 
-	function resetResult() {
-		resultContent.hidden = true;
-		resultEmpty.hidden = false;
-		syntheticMeter.style.width = "0";
-		realMeter.style.width = "0";
-	}
+  function clearPreviewUrl() {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+  }
 
-	function setFile(file) {
-		const error = validateFile(file);
-		if (error) {
-			selectedFile = null;
-			analyzeButton.disabled = true;
-			setStatus(error, true);
-			return;
-		}
+  function resetResult() {
+    resultContent.hidden = true;
+    resultEmpty.hidden = false;
+    syntheticMeter.style.width = "0";
+    realMeter.style.width = "0";
+  }
 
-		selectedFile = file;
-		clearPreviewUrl();
-		previewUrl = URL.createObjectURL(file);
-		imagePreview.src = previewUrl;
-		imagePreview.alt = `Preview of ${file.name}`;
-		dropPrompt.hidden = true;
-		previewWrap.hidden = false;
-		analyzeButton.disabled = false;
-		setStatus(
-			`${file.name} · ${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-		);
-		resetResult();
-	}
+  function setFile(file) {
+    const error = validateFile(file);
+    if (error) {
+      selectedFile = null;
+      analyzeButton.disabled = true;
+      setStatus(error, true);
+      return;
+    }
 
-	function chooseFile() {
-		fileInput.value = "";
-		fileInput.click();
-	}
+    selectedFile = file;
+    clearPreviewUrl();
+    previewUrl = URL.createObjectURL(file);
+    imagePreview.src = previewUrl;
+    imagePreview.alt = `Preview of ${file.name}`;
+    dropPrompt.hidden = true;
+    previewWrap.hidden = false;
+    analyzeButton.disabled = false;
+    setStatus(`${file.name} · ${(file.size / (1024 * 1024)).toFixed(2)} MB`);
+    resetResult();
+  }
 
-	dropZone.addEventListener("click", (event) => {
-		if (event.target === changeImageButton) return;
-		chooseFile();
-	});
+  function chooseFile() {
+    fileInput.value = "";
+    fileInput.click();
+  }
 
-	dropZone.addEventListener("keydown", (event) => {
-		if (event.key === "Enter" || event.key === " ") {
-			event.preventDefault();
-			chooseFile();
-		}
-	});
+  dropZone.addEventListener("click", (event) => {
+    if (event.target === changeImageButton) return;
+    chooseFile();
+  });
 
-	changeImageButton.addEventListener("click", (event) => {
-		event.stopPropagation();
-		chooseFile();
-	});
+  dropZone.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      chooseFile();
+    }
+  });
 
-	fileInput.addEventListener("change", () => {
-		setFile(fileInput.files?.[0]);
-	});
+  changeImageButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    chooseFile();
+  });
 
-	["dragenter", "dragover"].forEach((eventName) => {
-		dropZone.addEventListener(eventName, (event) => {
-			event.preventDefault();
-			dropZone.classList.add("is-dragging");
-		});
-	});
+  fileInput.addEventListener("change", () => setFile(fileInput.files?.[0]));
 
-	["dragleave", "drop"].forEach((eventName) => {
-		dropZone.addEventListener(eventName, (event) => {
-			event.preventDefault();
-			dropZone.classList.remove("is-dragging");
-		});
-	});
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropZone.classList.add("is-dragging");
+    });
+  });
 
-	dropZone.addEventListener("drop", (event) => {
-		setFile(event.dataTransfer?.files?.[0]);
-	});
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropZone.classList.remove("is-dragging");
+    });
+  });
 
-	function renderResult(data) {
-		const isSynthetic = String(data.label).toLowerCase() === "synthetic";
-		const synthetic = Number(data.synthetic_probability);
-		const real = Number(data.real_probability);
-		const decisionThreshold = Number(data.decision_threshold);
+  dropZone.addEventListener("drop", (event) => setFile(event.dataTransfer?.files?.[0]));
 
-		resultLabel.textContent = isSynthetic ? "Synthetic" : "Real";
-		resultSummary.textContent = isSynthetic
-			? "The model's synthetic score met or exceeded the operating threshold."
-			: "The model's synthetic score remained below the operating threshold.";
+  function renderResult(data) {
+    const normalizedLabel = String(data.label || "").toLowerCase();
+    const isSynthetic = normalizedLabel === "synthetic" || normalizedLabel === "fake";
+    const synthetic = Number(data.synthetic_probability ?? data.fake_probability);
+    const real = Number(data.real_probability);
+    const decisionThreshold = Number(data.decision_threshold);
 
-		resultBadge.textContent = "Review signal";
-		resultBadge.className = `result-badge ${isSynthetic ? "synthetic" : "real"}`;
+    resultLabel.textContent = isSynthetic ? "Synthetic" : "Real";
+    resultSummary.textContent = isSynthetic
+      ? "The model's synthetic score met or exceeded the operating threshold."
+      : "The model's synthetic score remained below the operating threshold.";
 
-		syntheticScore.textContent = formatPercent(synthetic);
-		realScore.textContent = formatPercent(real);
-		syntheticMeter.style.width = `${Math.max(0, Math.min(100, synthetic * 100))}%`;
-		realMeter.style.width = `${Math.max(0, Math.min(100, real * 100))}%`;
-		threshold.textContent = Number.isFinite(decisionThreshold)
-			? decisionThreshold.toFixed(2)
-			: "—";
-		caveatText.textContent =
-			data.caveat ||
-			"Review signal only; this prediction does not authenticate image provenance.";
+    resultBadge.textContent = "Review signal";
+    resultBadge.className = `result-badge ${isSynthetic ? "synthetic" : "real"}`;
 
-		resultEmpty.hidden = true;
-		resultContent.hidden = false;
-	}
+    syntheticScore.textContent = formatPercent(synthetic);
+    realScore.textContent = formatPercent(real);
+    syntheticMeter.style.width = `${Math.max(0, Math.min(100, synthetic * 100))}%`;
+    realMeter.style.width = `${Math.max(0, Math.min(100, real * 100))}%`;
+    threshold.textContent = Number.isFinite(decisionThreshold) ? decisionThreshold.toFixed(2) : "—";
+    caveatText.textContent =
+		data.caveat ||
+		"Use this prediction as an indicator for review—not as verification that the image is authentic or where it came from.";
 
-	analyzeButton.addEventListener("click", async () => {
-		const error = validateFile(selectedFile);
-		if (error) {
-			setStatus(error, true);
-			return;
-		}
+    resultEmpty.hidden = true;
+    resultContent.hidden = false;
+  }
 
-		const apiBaseUrl = String(config.apiBaseUrl || "").replace(/\/+$/, "");
-		if (!apiBaseUrl) {
-			setStatus(
-				"The GitHub Pages frontend is ready, but an inference API URL has not been configured yet. Add it in frontend/config.js or use the Streamlit demo.",
-				true,
-			);
-			return;
-		}
+  analyzeButton.addEventListener("click", async () => {
+    const error = validateFile(selectedFile);
+    if (error) {
+      setStatus(error, true);
+      return;
+    }
 
-		const form = new FormData();
-		form.append("file", selectedFile);
+    const apiBaseUrl = String(config.apiBaseUrl || "").replace(/\/+$/, "");
+    if (!apiBaseUrl) {
+      setStatus("No inference API URL is configured. Add it in frontend/config.js or use the Streamlit demo.", true);
+      return;
+    }
 
-		analyzeButton.disabled = true;
-		analyzeButton.textContent = "Analyzing…";
-		setStatus("Sending image to the Synthetic Sight inference API…");
+    const form = new FormData();
+    form.append("file", selectedFile);
 
-		try {
-			const response = await fetch(`${apiBaseUrl}/predict`, {
-				method: "POST",
-				body: form,
-				credentials: "omit",
-			});
+    analyzeButton.disabled = true;
+    analyzeButton.textContent = "Analyzing…";
+    setStatus("Running the image through the Synthetic Sight inference API…");
 
-			let payload = null;
-			try {
-				payload = await response.json();
-			} catch {
-				payload = null;
-			}
+    try {
+      const response = await fetch(`${apiBaseUrl}/predict`, {
+        method: "POST",
+        body: form,
+        credentials: "omit",
+      });
 
-			if (!response.ok) {
-				const detail =
-					payload?.detail ||
-					`Request failed with status ${response.status}.`;
-				throw new Error(detail);
-			}
+      let payload = null;
+      try { payload = await response.json(); } catch { payload = null; }
 
-			renderResult(payload);
-			setStatus("✓ Analysis complete.");
-		} catch (error) {
-			const message =
-				error instanceof TypeError
-					? "Could not reach the inference API. Check the API URL, HTTPS availability, and CORS configuration."
-					: error.message;
-			setStatus(message, true);
-		} finally {
-			analyzeButton.disabled = false;
-			analyzeButton.textContent = resultContent.hidden
-				? "Analyze image"
-				: "Analyze again";
-		}
-	});
+      if (!response.ok) {
+        throw new Error(payload?.detail || `Request failed with status ${response.status}.`);
+      }
 
-	window.addEventListener("beforeunload", clearPreviewUrl);
+      renderResult(payload);
+      setStatus("✓ Analysis complete.");
+    } catch (error) {
+      const message = error instanceof TypeError
+        ? "Could not reach the inference API. Check the API URL, HTTPS availability, and CORS configuration."
+        : error.message;
+      setStatus(message, true);
+    } finally {
+      analyzeButton.disabled = false;
+      analyzeButton.textContent = resultContent.hidden ? "Analyze image" : "Analyze again";
+    }
+  });
+
+  window.addEventListener("beforeunload", clearPreviewUrl);
 })();

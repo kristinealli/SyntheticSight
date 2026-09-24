@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description"
+    content="Synthetic Sight data, model architecture, training strategy, and reproducible evaluation method." />
+  <meta name="theme-color" content="#0b1118" />
+  <title>Method · Synthetic Sight</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="./index.html" aria-label="Synthetic Sight home"><span class="brand-mark"
+          aria-hidden="true"><svg viewBox="0 0 64 64">
+            <path d="M4 32s10-18 28-18 28 18 28 18-10 18-28 18S4 32 4 32Z"></path>
+            <circle cx="32" cy="32" r="9"></circle>
+          </svg></span><span><strong class="brand-title"><span class="brand-synthetic">Synthetic</span> <span
+              class="brand-sight">Sight</span></strong><small>AI-generated face detection · media
+            literacy</small></span></a>
+      <nav class="nav-links" aria-label="Project links"><a href="./index.html">Demo</a><a
+          href="./results.html">Results</a><a class="active" href="./methodology.html">Method</a><a
+          href="./responsible-ai.html">Responsible AI</a><a class="nav-github"
+          href="https://github.com/kristinealli/SyntheticSight" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero shell">
+      <div class="eyebrow">Model Architecture · Training Strategy</div>
+      <h1>One reproducible<br /><span class="accent-text">ResNet-50 pipeline.</span></h1>
+      <p class="hero-copy">The project narrowed from multiple model ideas to a controlled transfer-learning workflow:
+        standardized image preparation, a pretrained ResNet-50 backbone, a binary classifier head, validation-only model
+        selection, and one final locked-test evaluation.</p>
+    </section>
+    
+    <section class="poster-section shell" aria-labelledby="architecture-heading">
+      <div class="section-heading">
+        <p class="section-kicker">INPUT AND OUTPUT</p>
+        <h2 id="architecture-heading">
+          From face image to screening prediction.
+        </h2>
+    
+        <p>
+          Each image is converted to RGB, resized to 224 × 224 pixels,
+          and normalized before entering ResNet-50. The network produces
+          2,048 pooled visual features, which the binary classifier
+          converts into a probability score. Scores at or above 0.51
+          are classified as synthetic.
+        </p>
+      </div>
+    
+      <figure class="project-figure">
+        <img src="./assets/model-architecture.png"
+          alt="Diagram showing the Synthetic Sight model pipeline from input image through preprocessing, ResNet-50 feature extraction, binary classification, and the 0.51 decision threshold." />
+
+      </figure>
+    </section>
+
+    <section class="poster-section purple-panel shell" aria-labelledby="data-heading">
+      <span class="section-number">2</span><span class="vertical-label">Data &amp; Benchmark Setup</span>
+      <div class="section-heading-row">
+        <div>
+          <p class="section-kicker">140k Real and Fake Faces</p>
+          <h2 id="data-heading">Balanced real and synthetic images with separate roles for training, validation, and
+            test.</h2>
+        </div>
+        <p>The benchmark pairs real FFHQ faces with StyleGAN-generated faces. The official split uses 100,000 training
+          images, 20,000 validation images, and a 20,000-image held-out test set.</p>
+      </div>
+      <div class="data-split-grid" aria-label="Data split sizes">
+        <article><span>Training · model learns here</span><strong>100,000</strong><span>50,000 real + 50,000
+            synthetic</span></article>
+        <article><span>Validation · choose here</span><strong>20,000</strong><span>10,000 + 10,000</span></article>
+        <article><span>Test · measure once</span><strong>20,000</strong><span>10,000 + 10,000</span></article>
+      </div>
+      <p class="source-note">Dataset: <a href="https://www.kaggle.com/datasets/xhlulu/140k-real-and-fake-faces"
+          target="_blank" rel="noreferrer">Mo (2020), 140k Real and Fake Faces ↗</a></p>
+    </section>
+
+    <section class="poster-section slate-panel shell" aria-labelledby="architecture-heading">
+      <span class="section-number purple">3</span><span class="vertical-label">Model Architecture</span>
+      <div class="section-heading-row">
+        <div>
+          <p class="section-kicker">Transfer learning</p>
+          <h2 id="architecture-heading">ResNet-50 extracts visual features; a binary head turns them into one synthetic
+            score.</h2>
+        </div>
+        <p>Each face is converted to RGB, resized to 224 × 224, and normalized with ImageNet-compatible values.
+          ResNet-50 produces a 2,048-feature representation before the task-specific head.</p>
+      </div>
+      <div class="flow-card" aria-label="Classifier architecture">
+        <div>Input image<small>RGB · 224 × 224</small></div><i>→</i>
+        <div>ResNet-50<small>2,048 pooled features</small></div><i>→</i>
+        <div>Linear<small>2048 → 256</small></div><i>→</i>
+        <div>BN + ReLU<small>Dropout 0.30</small></div><i>→</i>
+        <div class="flow-output">Sigmoid score<small>synthetic if score ≥ 0.51</small></div>
+      </div>
+      <div class="tech-tags"><span>ImageNet pretrained</span><span>BCEWithLogitsLoss</span><span>Adam</span><span>weight
+          decay 1×10⁻⁴</span><span>seed 13</span><span>batch size 32</span></div>
+    </section>
+
+    <section class="poster-section shell" aria-labelledby="training-heading">
+      <span class="section-number">4</span><span class="vertical-label">Training Strategy</span>
+      <div class="section-heading-row">
+        <div>
+          <p class="section-kicker">Two-stage fine-tuning</p>
+          <h2 id="training-heading">Start with general visual knowledge, then adapt the deepest features.</h2>
+        </div>
+        <p>Training ran for up to 15 epochs. Epochs 1–3 trained only the new classifier head. Beginning at epoch 4,
+          ResNet layer4 was unfrozen so higher-level features could adapt to the real-vs.-synthetic task.</p>
+      </div>
+      <div class="timeline-grid">
+        <article><span class="step-number">01</span>
+          <p class="section-kicker">Epochs 1–3</p>
+          <h3>Train the head</h3>
+          <p>Keep the ResNet-50 backbone frozen. Train the task-specific head at a 5×10⁻⁴ learning rate.</p>
+        </article>
+        <article><span class="step-number">02</span>
+          <p class="section-kicker">Epochs 4–15</p>
+          <h3>Unfreeze layer4</h3>
+          <p>Fine-tune the deepest ResNet block at 1×10⁻⁵ while continuing to train the classifier head.</p>
+        </article>
+        <article><span class="step-number">03</span>
+          <p class="section-kicker">Checkpoint</p>
+          <h3>Select epoch 13</h3>
+          <p>The final checkpoint was selected from validation performance; epoch 13 also corresponded to the lowest
+            validation loss shown in the final presentation.</p>
+        </article>
+        <article><span class="step-number">04</span>
+          <p class="section-kicker">Decision rule</p>
+          <h3>Use threshold 0.51</h3>
+          <p>The threshold was chosen on validation data to maximize Synthetic/Fake F1 before final test evaluation.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section shell">
+      <div class="section-heading-row">
+        <div>
+          <p class="section-kicker">Training behavior</p>
+          <h2>Fine-tuning layer4 produced the sharpest drop in loss.</h2>
+        </div>
+        <p>Light augmentation—random horizontal flipping and small color jitter—was applied only to training images.
+          Validation and test preprocessing stayed deterministic.</p>
+      </div>
+      <div class="chart-grid">
+        <figure class="chart-card"><img src="./assets/resnet50_loss_curves.png"
+            alt="Training and validation loss curves across 15 epochs." />
+          <figcaption>Training and validation loss across epochs</figcaption>
+        </figure>
+        <figure class="chart-card"><img src="./assets/validation_metrics_by_epoch.png"
+            alt="Validation performance metrics by epoch." />
+          <figcaption>Validation metrics by epoch</figcaption>
+        </figure>
+      </div>
+    </section>
+    
+    
+    <section class="insight-band">
+      <div class="shell insight-inner">
+        <div>
+          <p class="section-kicker">Evaluation discipline</p>
+          <h2>The test set answers the final question; it does not steer development.</h2>
+        </div>
+        <p>Training data taught the model. Validation data guided checkpoint and threshold choices. The locked
+          20,000-image test split was evaluated once after those decisions were complete, reducing the risk of tuning to
+          the final score.</p>
+      </div>
+    </section>
+
+    <section class="content-section shell">
+      <div class="next-grid"><a class="next-card" href="./results.html"><span>Final evaluation</span><strong>See the
+            locked-test results</strong>
+          <p>Confusion matrix, error counts, ROC–AUC, and probability separation.</p>
+        </a><a class="next-card" href="./responsible-ai.html"><span>Beyond accuracy</span><strong>See the responsible-AI
+            review</strong>
+          <p>Bias risks, mitigation choices, representation checks, and use limitations.</p>
+        </a></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <p>Synthetic Sight · AI4ALL Ignite Summer 2026 · Group 09C</p>
+      <p class="footer-team">Julissa Lema · Kristine Johnson · Ricky Dixon · Shloka Kandukuri</p>
+    </div>
+  </footer>
+</body>
+
+</html>

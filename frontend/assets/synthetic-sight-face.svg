@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 720" role="img" aria-labelledby="title desc">
+  <title id="title">Synthetic Sight human and network face illustration</title>
+  <desc id="desc">A stylized split portrait: one half human silhouette and one half circuit network.</desc>
+  <defs>
+    <clipPath id="headClip">
+      <path d="M310 48c-130 0-225 93-225 236 0 98 42 165 86 208 19 19 27 42 27 69v93h224v-93c0-27 8-50 27-69 44-43 86-110 86-208C535 141 440 48 310 48Z"/>
+    </clipPath>
+    <pattern id="grain" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="7" r="1.3" fill="#0c1117" opacity=".75"/>
+      <circle cx="19" cy="4" r="1.1" fill="#0c1117" opacity=".55"/>
+      <circle cx="13" cy="20" r="1.5" fill="#0c1117" opacity=".65"/>
+      <circle cx="24" cy="15" r=".8" fill="#0c1117" opacity=".5"/>
+    </pattern>
+  </defs>
+  <g clip-path="url(#headClip)">
+    <rect x="55" y="25" width="510" height="655" fill="#d7d8d7"/>
+    <rect x="55" y="25" width="255" height="655" fill="url(#grain)"/>
+    <rect x="310" y="25" width="255" height="655" fill="#bfc1c4"/>
+    <path d="M310 22v658" stroke="#0c1117" stroke-width="7"/>
+    <g fill="none" stroke="#35455b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M326 86l60 36 46-28 44 52-23 54 45 44-11 62 42 44-32 44 16 68-51 25-16 61-65 5-35 59"/>
+      <path d="M326 162l70 30 54-5 42 43-53 35 40 57-55 29 28 61-69 14-6 75-51 24"/>
+      <path d="M350 111l18 88-29 59 45 47-43 61 37 70-33 66"/>
+      <path d="M408 126l-12 66 43 73-15 86 54 71"/>
+      <path d="M472 148l-22 39"/>
+      <path d="M487 306l-63 45"/>
+      <path d="M452 412l-74 24"/>
+    </g>
+    <g fill="#6f62a8" stroke="#0c1117" stroke-width="4">
+      <circle cx="386" cy="122" r="10"/><circle cx="432" cy="94" r="10"/><circle cx="476" cy="146" r="10"/>
+      <circle cx="396" cy="192" r="10"/><circle cx="450" cy="187" r="10"/><circle cx="492" cy="230" r="10"/>
+      <circle cx="439" cy="265" r="10"/><circle cx="479" cy="322" r="10"/><circle cx="424" cy="351" r="10"/>
+      <circle cx="452" cy="412" r="10"/><circle cx="378" cy="436" r="10"/><circle cx="412" cy="497" r="10"/>
+    </g>
+    <path d="M135 239c38-28 79-28 116 0" fill="none" stroke="#0c1117" stroke-width="13" stroke-linecap="round"/>
+    <path d="M120 305c29-23 58-24 87 0-26 28-59 28-87 0Z" fill="#0c1117"/>
+    <path d="M310 292c39-34 83-34 122 0-36 42-83 42-122 0Z" fill="none" stroke="#0c1117" stroke-width="10"/>
+    <circle cx="371" cy="292" r="20" fill="#7bd1cc" stroke="#0c1117" stroke-width="8"/>
+    <circle cx="371" cy="292" r="7" fill="#0c1117"/>
+    <path d="M250 275c-7 48-15 91-28 132 15 12 32 16 51 13" fill="none" stroke="#0c1117" stroke-width="9" stroke-linecap="round"/>
+    <path d="M237 478c31 14 64 14 98 0" fill="none" stroke="#0c1117" stroke-width="10" stroke-linecap="round"/>
+    <path d="M115 545c65 23 130 27 195 12" fill="none" stroke="#0c1117" stroke-width="5" opacity=".45"/>
+  </g>
+  <path d="M310 48c-130 0-225 93-225 236 0 98 42 165 86 208 19 19 27 42 27 69v93h224v-93c0-27 8-50 27-69 44-43 86-110 86-208C535 141 440 48 310 48Z" fill="none" stroke="#d7d8d7" stroke-width="8"/>
+</svg>
